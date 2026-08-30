@@ -1,26 +1,25 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
-import Layout from './components/Layout/Layout.jsx'
-import Dashboard from './pages/Dashboard.jsx'
-import JWTTools from './pages/JWTTools.jsx'
-import SSLTools from './pages/SSLTools.jsx'
+import { useState } from 'react';
+import Sidebar from './components/layout/Sidebar.jsx';
+import SSLTools from './components/ssl/SSLTools.jsx';
+import JWTTools from './components/jwt/JWTTools.jsx';
+import styles from './App.module.css';
 
-function App() {
+const TOOLS = [
+  { id: 'ssl', label: '🔐 SSL Tools' },
+  { id: 'jwt', label: '🪙 JWT Tools' },
+];
+
+export default function App() {
+  const [active, setActive] = useState('ssl');
+  const [darkMode, setDarkMode] = useState(true);
+
   return (
-    <Routes>
-      <Route element={<Layout />}>
-        <Route index element={<Dashboard />} />
-        <Route path="ssl">
-          <Route index element={<Navigate replace to="extract-ca" />} />
-          <Route path=":toolId" element={<SSLTools />} />
-        </Route>
-        <Route path="jwt">
-          <Route index element={<Navigate replace to="decode" />} />
-          <Route path=":toolId" element={<JWTTools />} />
-        </Route>
-        <Route path="*" element={<Navigate replace to="/" />} />
-      </Route>
-    </Routes>
-  )
+    <div className={`${styles.app} ${darkMode ? styles.dark : styles.light}`}>
+      <Sidebar tools={TOOLS} active={active} onSelect={setActive} darkMode={darkMode} onToggleDark={() => setDarkMode(d => !d)} />
+      <main className={styles.main}>
+        {active === 'ssl' && <SSLTools />}
+        {active === 'jwt' && <JWTTools />}
+      </main>
+    </div>
+  );
 }
-
-export default App

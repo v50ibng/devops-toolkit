@@ -1,8 +1,32 @@
 services:
-  devops-toolkit:
+  # ── Express API backend ───────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    environment:
+      PORT: "3001"
+      # Allow requests from the nginx frontend container.
+      # In production replace with your actual domain.
+      CORS_ORIGIN: "http://localhost"
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ── Vite/React frontend served by nginx ───────────────────────────────────
+  frontend:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
     restart: unless-stopped

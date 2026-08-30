@@ -55,9 +55,12 @@ function CertificateChain() {
 
       {certificates.length ? (
         <div className="space-y-4">
-          <div className="grid gap-4 lg:grid-cols-[repeat(3,minmax(0,1fr))]">
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-stretch">
             {certificates.map((certificate, index) => (
-              <div key={`${certificate.subject}-${index}`} className="space-y-4">
+              <div
+                key={`${certificate.subject}-${index}`}
+                className="flex flex-col gap-4 xl:flex-1 xl:flex-row xl:items-center"
+              >
                 <button
                   type="button"
                   onClick={() =>
@@ -86,7 +89,7 @@ function CertificateChain() {
                 </button>
 
                 {index < certificates.length - 1 ? (
-                  <div className="flex justify-center text-3xl text-blue-300">↓</div>
+                  <div className="flex justify-center text-3xl text-blue-300 xl:px-2">→</div>
                 ) : null}
               </div>
             ))}

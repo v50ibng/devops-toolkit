@@ -96,7 +96,7 @@ export function orderCertificateChain(certificates) {
     return certificates
   }
 
-  const findLeaf = certificates.find(
+  const leafCertificate = certificates.find(
     (candidate) =>
       !certificates.some(
         (certificate) =>
@@ -105,12 +105,12 @@ export function orderCertificateChain(certificates) {
       ),
   )
 
-  if (!findLeaf) {
+  if (!leafCertificate) {
     return [...certificates].reverse()
   }
 
-  const orderedLeafToRoot = [findLeaf]
-  const seen = new Set([findLeaf.subject])
+  const orderedLeafToRoot = [leafCertificate]
+  const seen = new Set([leafCertificate.subject])
 
   while (orderedLeafToRoot.length < certificates.length) {
     const current = orderedLeafToRoot[orderedLeafToRoot.length - 1]
@@ -128,7 +128,7 @@ export function orderCertificateChain(certificates) {
   }
 
   const remaining = certificates.filter((certificate) => !seen.has(certificate.subject))
-  return [...orderedLeafToRoot, ...remaining].reverse()
+  return [...orderedLeafToRoot.reverse(), ...remaining]
 }
 
 export function extractCaCertificate(value) {
@@ -144,19 +144,29 @@ export function extractCaCertificate(value) {
 export function compareCertificateAndKey(certificatePem, keyPem) {
   const certificate = pki.certificateFromPem(certificatePem)
   const privateKey = pki.privateKeyFromPem(keyPem)
+
+  if (!privateKey?.n || !privateKey?.e) {
+    throw new Error('Only RSA private keys are currently supported for key matching.')
+  }
+
+  const derivedPublicKey = pki.setRsaPublicKey(privateKey.n, privateKey.e)
   const certificatePublicKeyPem = pki
     .publicKeyToPem(certificate.publicKey)
     .replace(/\r\n/g, '\n')
     .trim()
   const keyPublicKeyPem = pki
-    .publicKeyToPem(pki.setRsaPublicKey(privateKey.n, privateKey.e))
+    .publicKeyToPem(derivedPublicKey)
     .replace(/\r\n/g, '\n')
     .trim()
+  const certificatePublicKeyDer = asn1
+    .toDer(pki.publicKeyToAsn1(certificate.publicKey))
+    .getBytes()
+  const keyPublicKeyDer = asn1.toDer(pki.publicKeyToAsn1(derivedPublicKey)).getBytes()
 
   return {
     matches: certificatePublicKeyPem === keyPublicKeyPem,
-    certificateFingerprint: toFingerPrint(certificatePublicKeyPem),
-    keyFingerprint: toFingerPrint(keyPublicKeyPem),
+    certificateFingerprint: toFingerPrint(certificatePublicKeyDer),
+    keyFingerprint: toFingerPrint(keyPublicKeyDer),
   }
 }
 

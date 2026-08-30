@@ -4,8 +4,12 @@ function CopyButton({ label = 'Copy', value }) {
   const toast = useToast()
 
   async function handleCopy() {
-    await navigator.clipboard.writeText(value)
-    toast.show('Copied to clipboard.')
+    try {
+      await navigator.clipboard.writeText(value)
+      toast.show('Copied to clipboard.')
+    } catch {
+      toast.show('Copy failed. Your browser blocked clipboard access.')
+    }
   }
 
   return (

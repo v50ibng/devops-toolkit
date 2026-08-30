@@ -5,7 +5,7 @@ export function downloadTextFile(filename, content, type = 'text/plain;charset=u
   anchor.href = url
   anchor.download = filename
   anchor.click()
-  URL.revokeObjectURL(url)
+  window.setTimeout(() => URL.revokeObjectURL(url), 0)
 }
 
 export function downloadBinaryFile(filename, bytes, type = 'application/octet-stream') {
@@ -15,7 +15,7 @@ export function downloadBinaryFile(filename, bytes, type = 'application/octet-st
   anchor.href = url
   anchor.download = filename
   anchor.click()
-  URL.revokeObjectURL(url)
+  window.setTimeout(() => URL.revokeObjectURL(url), 0)
 }
 
 export function readFileAsText(file) {
@@ -32,7 +32,14 @@ export function readFileAsBinaryString(file) {
     const reader = new FileReader()
     reader.onload = () => {
       const bytes = new Uint8Array(reader.result)
-      resolve(String.fromCharCode(...bytes))
+      let result = ''
+
+      for (let index = 0; index < bytes.length; index += 0x8000) {
+        const chunk = bytes.subarray(index, index + 0x8000)
+        result += String.fromCharCode.apply(null, chunk)
+      }
+
+      resolve(result)
     }
     reader.onerror = () => reject(reader.error || new Error('Unable to read file.'))
     reader.readAsArrayBuffer(file)

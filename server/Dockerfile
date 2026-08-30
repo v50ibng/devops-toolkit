@@ -1,7 +1,6 @@
 FROM node:20-alpine
 
-# Install openssl (required for the SSL tools)
-RUN apk add --no-cache openssl
+# openssl is already included in node:20-alpine as a Node.js dependency
 
 WORKDIR /app
 

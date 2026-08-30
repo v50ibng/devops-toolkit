@@ -10,9 +10,6 @@ COPY index.html vite.config.js ./
 COPY public ./public
 COPY src ./src
 
-ARG VITE_API_BASE=/api
-ENV VITE_API_BASE=$VITE_API_BASE
-
 RUN npm run build
 
 # ── Stage 2: serve the built assets with nginx ────────────────────────────────

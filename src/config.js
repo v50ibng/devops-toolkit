@@ -1,3 +1,4 @@
-// In development (npm run dev) falls back to the local backend on port 3001.
-// In Docker (VITE_API_BASE=/api) nginx proxies /api/* to the backend container.
-export const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:3001';
+// Always use /api as the base path.
+// In development: Vite dev server proxies /api/* → http://localhost:3001 (see vite.config.js).
+// In Docker: nginx proxies /api/* → backend:3001 (see nginx.conf).
+export const API_BASE = '/api';

@@ -31,7 +31,7 @@ export default function ExtractCA() {
         setResult(data);
       }
     } catch {
-      setError('Could not reach the backend server. Make sure it is running on port 3001.');
+      setError('Backend server is unreachable. In development, run: cd server && npm start');
     } finally {
       setLoading(false);
     }

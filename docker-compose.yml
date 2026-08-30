@@ -24,9 +24,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      args:
-        # /api is relative — nginx will proxy it to the backend container
-        VITE_API_BASE: "/api"
     ports:
       - "80:80"
     depends_on:

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Extract CA from Host — DevOps Toolkit</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' };
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', 'Fira Code', monospace; }
+    .sidebar-item:hover { background: rgba(99,102,241,0.15); }
+    .btn-primary { transition: background 0.15s, box-shadow 0.15s; }
+    .btn-primary:hover { box-shadow: 0 0 0 3px rgba(99,102,241,0.35); }
+  </style>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col">
+
+  <!-- Top Bar -->
+  <header class="bg-gray-900 border-b border-gray-800 px-6 py-3 flex items-center justify-between sticky top-0 z-10 shadow-lg">
+    <div class="flex items-center gap-3">
+      <button class="md:hidden text-gray-400 hover:text-white mr-1" onclick="document.getElementById('sidebar').classList.toggle('hidden')">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <a href="index.html" class="text-2xl font-bold text-white tracking-tight hover:text-indigo-300 transition-colors">🔧 DevOps Toolkit</a>
+      <span class="hidden sm:inline text-xs bg-indigo-600 text-white px-2 py-0.5 rounded-full font-medium">v1.0</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="text-xs text-gray-500 hidden md:block">All processing in-browser</span>
+      <button title="Toggle theme" class="w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center text-gray-300 hover:text-white transition-colors" onclick="document.documentElement.classList.toggle('dark')">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 7a5 5 0 100 10A5 5 0 0012 7z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="flex flex-1 overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="hidden md:flex flex-col w-64 bg-gray-900 border-r border-gray-800 pt-6 pb-4 overflow-y-auto shrink-0">
+      <div class="mb-2 px-3">
+        <button class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-semibold text-gray-300 hover:text-white sidebar-item transition-colors">
+          <span class="flex items-center gap-2"><span class="text-base">🔐</span> SSL Tools</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="ml-2 mt-1 space-y-0.5">
+          <a href="ssl-extract-ca.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-white bg-indigo-600/20 border border-indigo-500/30 font-medium">
+            <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0"></span> Extract CA from Host
+          </a>
+          <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white sidebar-item transition-colors">
+            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0"></span> Display Cert Details
+          </a>
+          <a href="ssl-cert-chain.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white sidebar-item transition-colors">
+            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0"></span> Show Cert Chain
+          </a>
+          <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white sidebar-item transition-colors">
+            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0"></span> Verify Cert &amp; Key
+          </a>
+          <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white sidebar-item transition-colors">
+            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0"></span> PEM ↔ DER Converter
+          </a>
+          <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white sidebar-item transition-colors">
+            <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0"></span> Gen Self-Signed Cert
+          </a>
+        </div>
+      </div>
+      <div class="mb-2 px-3">
+        <button class="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-semibold text-gray-300 hover:text-white sidebar-item transition-colors">
+          <span class="flex items-center gap-2"><span class="text-base">🪙</span> JWT Tools</span>
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </button>
+        <div class="ml-2 mt-1 space-y-0.5">
+          <a href="jwt-decode.html" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white sidebar-item transition-colors">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span> Decode JWT
+          </a>
+          <a href="#" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-gray-400 hover:text-white sidebar-item transition-colors">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0"></span> Validate JWT
+          </a>
+        </div>
+      </div>
+      <div class="mb-2 px-3">
+        <span class="flex items-center justify-between px-3 py-2 text-sm font-semibold text-gray-500">
+          <span class="flex items-center gap-2"><span class="text-base">🔮</span> More <span class="text-xs bg-gray-700 text-gray-400 px-1.5 py-0.5 rounded ml-1">Soon</span></span>
+        </span>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto p-6 md:p-8 bg-gray-950">
+
+      <!-- Breadcrumb -->
+      <nav class="flex items-center gap-2 text-sm text-gray-500 mb-6">
+        <a href="index.html" class="hover:text-white transition-colors">Dashboard</a>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <span class="text-gray-300">SSL Tools</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <span class="text-white font-medium">Extract CA from Host</span>
+      </nav>
+
+      <!-- Page Header -->
+      <div class="flex items-center gap-3 mb-8">
+        <div class="w-12 h-12 rounded-xl bg-indigo-600/20 flex items-center justify-center text-2xl">🏛️</div>
+        <div>
+          <h1 class="text-2xl font-bold text-white">Extract CA from Host</h1>
+          <p class="text-gray-400 text-sm mt-0.5">Connect to a remote host and extract the Certificate Authority certificate.</p>
+        </div>
+      </div>
+
+      <!-- Form Card -->
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6 max-w-2xl">
+        <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Connection</h2>
+        <div class="flex flex-col sm:flex-row gap-4 mb-5">
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-300 mb-1.5">Hostname</label>
+            <input type="text" value="github.com" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent mono" placeholder="github.com" />
+          </div>
+          <div class="w-full sm:w-28">
+            <label class="block text-sm font-medium text-gray-300 mb-1.5">Port</label>
+            <input type="text" value="443" class="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent mono" placeholder="443" />
+          </div>
+        </div>
+        <button class="btn-primary bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-6 py-2.5 rounded-lg text-sm flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          Extract
+        </button>
+      </div>
+
+      <!-- Result Card -->
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-6 max-w-4xl">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider">📄 Result — PEM Certificate</h2>
+          <div class="flex items-center gap-2">
+            <span class="text-xs bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-2 py-1 rounded-full">✓ Extracted</span>
+          </div>
+        </div>
+        <div class="relative">
+          <pre class="mono text-xs text-emerald-300 bg-gray-950 border border-gray-800 rounded-xl p-4 overflow-x-auto leading-relaxed">-----BEGIN CERTIFICATE-----
+MIIFajCCBPGgAwIBAgISA8J+D7yBhWVjB7qCc0XqMcLRMA0GCSqGSIb3DQEBCwUA
+MDIxCzAJBgNVBAYTAlVTMRYwFAYDVQQKEw1MZXQncyBFbmNyeXB0MQswCQYDVQQD
+EwJSMzAeFw0yNTAzMDExMjAwMDBaFw0yNTA1MzAxMjAwMDBaMBYxFDASBgNVBAMT
+C2dpdGh1Yi5jb20wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQC7o4qn
+e60TB3wolVMCuikRS5KZWT2VtKRLXDnl4BaepfK6DLO28nZnS8QiVNTHUmhF3cq
+DigiCert High Assurance CA-3 MIIF6TCCA9GgAwIBAgIQBeTgh2rHAyy9iBV1gK
+-----END CERTIFICATE-----</pre>
+        </div>
+        <div class="flex items-center gap-3 mt-4">
+          <button class="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+            Copy PEM
+          </button>
+          <button class="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm font-medium px-4 py-2 rounded-lg transition-colors">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Download .pem
+          </button>
+        </div>
+      </div>
+
+      <!-- Parsed Details Card -->
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6 max-w-4xl">
+        <h2 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-5">📊 Parsed Certificate Details</h2>
+        <div class="overflow-hidden rounded-xl border border-gray-800">
+          <table class="w-full text-sm">
+            <tbody>
+              <tr class="border-b border-gray-800">
+                <td class="px-4 py-3 text-gray-400 font-medium w-36 bg-gray-800/50">Subject</td>
+                <td class="px-4 py-3 text-white mono">CN=github.com, O=GitHub, Inc., C=US</td>
+              </tr>
+              <tr class="border-b border-gray-800">
+                <td class="px-4 py-3 text-gray-400 font-medium bg-gray-800/50">Issuer</td>
+                <td class="px-4 py-3 text-white mono">CN=DigiCert TLS Hybrid ECC SHA384 2020 CA1, O=DigiCert Inc, C=US</td>
+              </tr>
+              <tr class="border-b border-gray-800">
+                <td class="px-4 py-3 text-gray-400 font-medium bg-gray-800/50">Valid From</td>
+                <td class="px-4 py-3 text-white mono">2025-03-01 00:00:00 UTC</td>
+              </tr>
+              <tr class="border-b border-gray-800">
+                <td class="px-4 py-3 text-gray-400 font-medium bg-gray-800/50">Valid Until</td>
+                <td class="px-4 py-3">
+                  <span class="mono text-white">2026-03-15 23:59:59 UTC</span>
+                  <span class="ml-3 text-xs bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full">Valid · 197 days left</span>
+                </td>
+              </tr>
+              <tr class="border-b border-gray-800">
+                <td class="px-4 py-3 text-gray-400 font-medium bg-gray-800/50">SANs</td>
+                <td class="px-4 py-3 text-white mono text-xs leading-relaxed">github.com, *.github.com, www.github.com, *.githubusercontent.com, *.githubassets.com</td>
+              </tr>
+              <tr class="border-b border-gray-800">
+                <td class="px-4 py-3 text-gray-400 font-medium bg-gray-800/50">Serial</td>
+                <td class="px-4 py-3 text-white mono text-xs">08:F9:CB:D2:31:77:98:34:A1:5C:B3:4F:02:19:41:02</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-3 text-gray-400 font-medium bg-gray-800/50">SHA-256 Fingerprint</td>
+                <td class="px-4 py-3 text-white mono text-xs">A4:9D:31:9A:B5:9B:C3:24:D5:F0:48:56:E0:82:B7:D4:79:53:F2:8A:6C:1B:3E:9D:28:56:F1:C7:E2:AB:CD:12</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-gray-900 border-t border-gray-800 py-3 px-6 text-center text-xs text-gray-500">
+    🔒 All processing happens in your browser. No data leaves your machine.
+  </footer>
+
+</body>
+</html>

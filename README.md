@@ -8,6 +8,39 @@ A web UI that simplifies DevOps tasks — OpenSSL certificate tools, JWT decoder
 - 📄 **Certificate Details** — Paste a PEM certificate to inspect Subject, Issuer, SANs, Validity, Fingerprint
 - 🪙 **Decode JWT** — Decode and inspect JWT header and payload in-browser
 
+## Running with Docker
+
+The easiest way to run the full stack is with Docker Compose.
+
+### Prerequisites
+- [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/) installed
+
+### Start
+
+```bash
+docker compose up --build
+```
+
+The app will be available at **http://localhost**.
+
+- Frontend (nginx) — port **80**
+- Backend (Express) — port **3001** (also reachable at `/api/` via the nginx proxy)
+
+### Stop
+
+```bash
+docker compose down
+```
+
+### Architecture
+
+```
+Browser → nginx:80 → /api/* → Express:3001 → openssl CLI
+                   → /*     → Vite build (static)
+```
+
+nginx serves the pre-built React app and proxies all `/api/` traffic to the Express backend container, so no CORS headers are needed in production.
+
 ## Running the full stack
 
 ### Prerequisites
@@ -45,18 +78,22 @@ npm run dev:all
 ## Project structure
 
 ```
+Dockerfile            Multi-stage build: Vite → nginx
+nginx.conf            nginx config (SPA fallback + /api proxy)
+docker-compose.yml    Compose file wiring frontend + backend
 server/
-  index.js          Express server entry point (port 3001)
-  routes/ssl.js     SSL-related API routes
-  utils/openssl.js  Wrapper around openssl CLI commands
-  utils/parser.js   Parse openssl output into structured data
+  Dockerfile          Node 20 + openssl image for the backend
+  index.js            Express server entry point (port 3001)
+  routes/ssl.js       SSL-related API routes
+  utils/openssl.js    Wrapper around openssl CLI commands
+  utils/parser.js     Parse openssl output into structured data
   package.json
 src/
   components/
-    ssl/            Extract CA, Cert Chain, Cert Details components
-    jwt/            Decode JWT component
-    layout/         Sidebar
-    ui/             Shared UI primitives (Card, Spinner, etc.)
+    ssl/              Extract CA, Cert Chain, Cert Details components
+    jwt/              Decode JWT component
+    layout/           Sidebar
+    ui/               Shared UI primitives (Card, Spinner, etc.)
   App.jsx
   main.jsx
 ```

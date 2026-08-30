@@ -6,7 +6,7 @@ import Spinner from '../ui/Spinner.jsx';
 import ErrorMessage from '../ui/ErrorMessage.jsx';
 import styles from './CertChain.module.css';
 
-const API_BASE = 'http://localhost:3001';
+import { API_BASE } from '../../config.js';
 
 const POSITION_COLORS = {
   Root: '#10b981',

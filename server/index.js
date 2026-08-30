@@ -4,8 +4,9 @@ import sslRouter from './routes/ssl.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const ALLOWED_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:5173';
 
-app.use(cors());
+app.use(cors({ origin: ALLOWED_ORIGIN }));
 app.use(express.json());
 
 app.use('/api/ssl', sslRouter);

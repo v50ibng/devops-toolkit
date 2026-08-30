@@ -66,7 +66,7 @@ export default function DecodeJWT() {
         rows={4}
         value={token}
         onChange={e => setToken(e.target.value)}
-        placeholder="******"
+        placeholder="Paste JWT token here..."
       />
       <button className="btn-primary" onClick={handleDecode} disabled={!token.trim()}>
         🔍 Decode

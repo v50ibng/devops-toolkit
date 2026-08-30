@@ -5,7 +5,7 @@ import CertResult from '../ui/CertResult.jsx';
 import Spinner from '../ui/Spinner.jsx';
 import ErrorMessage from '../ui/ErrorMessage.jsx';
 
-const API_BASE = 'http://localhost:3001';
+import { API_BASE } from '../../config.js';
 
 export default function ExtractCA() {
   const [host, setHost] = useState('');

@@ -55,8 +55,16 @@ export function parseCert(pem) {
 export function assignChainPositions(pems) {
   return pems.map((pem, i) => {
     let position = 'Intermediate';
-    if (i === 0) position = 'Leaf';
-    else if (i === pems.length - 1) position = 'Root';
+    if (pems.length === 1) {
+      // Single cert — check if self-signed (subject === issuer => Root/self-signed)
+      const cert = (() => { try { return forge.pki.certificateFromPem(pem); } catch { return null; } })();
+      const isSelfSigned = cert && cert.subject.hash === cert.issuer.hash;
+      position = isSelfSigned ? 'Root' : 'Leaf';
+    } else if (i === 0) {
+      position = 'Leaf';
+    } else if (i === pems.length - 1) {
+      position = 'Root';
+    }
     return {
       position,
       pem,

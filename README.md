@@ -32,3 +32,20 @@ Then open the local Vite URL shown in your terminal.
 - `npm run dev` — start the development server
 - `npm run build` — create a production build
 - `npm run lint` — run Oxlint
+
+## Docker
+
+Build and run with Docker Compose:
+
+```bash
+docker compose up --build
+```
+
+Then open http://localhost:8080.
+
+Build and run with Docker directly:
+
+```bash
+docker build -t devops-toolkit .
+docker run --rm -p 8080:80 devops-toolkit
+```

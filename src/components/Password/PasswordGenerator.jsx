@@ -9,19 +9,6 @@ const CHARSETS = {
   symbols: '!@#$%^&*()-_=+[]{}|;:,.<>?',
 }
 
-function generatePassword(length, options) {
-  const pool = Object.entries(CHARSETS)
-    .filter(([key]) => options[key])
-    .map(([, chars]) => chars)
-    .join('')
-
-  if (!pool) return ''
-
-  const array = new Uint32Array(length)
-  crypto.getRandomValues(array)
-  return Array.from(array, (value) => pool[value % pool.length]).join('')
-}
-
 function PasswordGenerator() {
   const toast = useToast()
   const [length, setLength] = useState(20)
@@ -31,16 +18,24 @@ function PasswordGenerator() {
     numbers: true,
     symbols: false,
   })
-  const [password, setPassword] = useState('')
+  const [result, setResult] = useState(null)
 
   const handleGenerate = useCallback(() => {
-    setPassword(generatePassword(length, options))
+    const pool = Object.entries(CHARSETS)
+      .filter(([key]) => options[key])
+      .map(([, chars]) => chars)
+      .join('')
+    if (!pool) return
+    const array = new Uint32Array(length)
+    crypto.getRandomValues(array)
+    const password = Array.from(array, (value) => pool[value % pool.length]).join('')
+    setResult({ password, poolSize: pool.length, length })
   }, [length, options])
 
   async function handleCopy() {
-    if (!password) return
+    if (!result?.password) return
     try {
-      await navigator.clipboard.writeText(password)
+      await navigator.clipboard.writeText(result.password)
       toast.show('Password copied to clipboard.')
     } catch {
       toast.show('Copy failed. Your browser blocked clipboard access.')
@@ -113,10 +108,10 @@ function PasswordGenerator() {
         Generate password
       </button>
 
-      {password ? (
+      {result ? (
         <div className="space-y-3">
           <div className="flex items-center gap-3 rounded-2xl border border-slate-700 bg-slate-900/60 px-4 py-3">
-            <p className="mono-output flex-1 break-all text-slate-100 text-base">{password}</p>
+            <p className="mono-output flex-1 break-all text-slate-100 text-base">{result.password}</p>
             <button
               type="button"
               onClick={handleCopy}
@@ -126,18 +121,9 @@ function PasswordGenerator() {
             </button>
           </div>
           <div className="flex flex-wrap gap-4 text-xs text-slate-500">
-            <span>{password.length} characters</span>
+            <span>{result.length} characters</span>
             <span>
-              Entropy ≈{' '}
-              {Math.floor(
-                password.length *
-                  Math.log2(
-                    Object.entries(CHARSETS)
-                      .filter(([key]) => options[key])
-                      .reduce((sum, [, chars]) => sum + chars.length, 0),
-                  ),
-              )}{' '}
-              bits
+              Entropy ≈ {Math.floor(result.length * Math.log2(result.poolSize))} bits
             </span>
           </div>
         </div>

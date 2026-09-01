@@ -9,7 +9,7 @@ const TIMEOUT_MS = 10000;
  */
 export function validateHost(host) {
   if (typeof host !== 'string') return false;
-  if (!/^[a-zA-Z0-9.\-]+$/.test(host) || host.length > 253) return false;
+  if (!/^[a-zA-Z0-9.-]+$/.test(host) || host.length > 253) return false;
 
   // Block loopback and common private/internal ranges
   const blocked = [
@@ -36,13 +36,16 @@ export function validatePort(port) {
 }
 
 /**
- * Run `openssl s_client -connect host:port -showcerts` and return stdout+stderr.
+ * Run `openssl s_client -connect host:port -servername host -showcerts` and return stdout+stderr.
+ * The -servername flag enables SNI, which is required by many hosts (e.g. CDNs, GitHub)
+ * to serve the correct certificate chain.
  */
 export function fetchCertChain(host, port) {
   return new Promise((resolve, reject) => {
     const args = [
       's_client',
       '-connect', `${host}:${port}`,
+      '-servername', host,
       '-showcerts',
     ];
 
@@ -50,8 +53,15 @@ export function fetchCertChain(host, port) {
       if (err && err.killed) {
         return reject(new Error('Connection timed out'));
       }
-      // openssl s_client exits non-zero but still produces useful output
-      resolve({ stdout, stderr });
+      if (err && err.code === 'ENOENT') {
+        return reject(err);
+      }
+      // openssl s_client exits non-zero but still produces useful output on success.
+      // Only reject if stdout contains no PEM data at all and stderr has an error message.
+      if ((!stdout || !stdout.includes('BEGIN CERTIFICATE')) && stderr && err) {
+        return reject(new Error(stderr.split('\n').find(l => l.trim()) || err.message));
+      }
+      resolve({ stdout: stdout || '', stderr: stderr || '' });
     });
 
     // Send empty input so s_client doesn't wait for stdin

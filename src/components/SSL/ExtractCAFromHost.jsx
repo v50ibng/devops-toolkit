@@ -1,42 +1,49 @@
 import { useState } from 'react'
-import ToolCard from '../common/ToolCard.jsx'
 import CodeBlock from '../common/CodeBlock.jsx'
-import FileUpload from '../common/FileUpload.jsx'
+import ToolCard from '../common/ToolCard.jsx'
 import { useToast } from '../common/useToast.jsx'
-import { extractCaCertificate } from '../../utils/certificates.js'
-import { downloadTextFile, readFileAsText } from '../../utils/files.js'
+import { API_BASE } from '../../config.js'
+import { downloadTextFile } from '../../utils/files.js'
 
 function ExtractCAFromHost() {
   const toast = useToast()
   const [hostname, setHostname] = useState('')
   const [port, setPort] = useState('443')
-  const [pemChain, setPemChain] = useState('')
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [result, setResult] = useState(null)
+  const [certs, setCerts] = useState([])
 
-  async function handleFileSelect(file) {
-    const text = await readFileAsText(file)
-    setPemChain(text)
-  }
-
-  function handleExtract() {
+  async function handleExtract() {
+    setLoading(true)
+    setError('')
+    setCerts([])
     try {
-      setError('')
-      setResult(extractCaCertificate(pemChain))
-    } catch (extractError) {
-      setResult(null)
-      setError(extractError.message || 'Invalid PEM chain.')
+      const res = await fetch(`${API_BASE}/ssl/extract-ca`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ host: hostname.trim(), port: Number(port) }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setError(data.error || 'Request failed.')
+      } else {
+        setCerts(data.certs)
+      }
+    } catch {
+      setError('Backend is unreachable. Ensure the server is running.')
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
     <ToolCard
       title="Extract CA from Host"
-      description="Browsers cannot directly open arbitrary TLS sockets, so this tool accepts a pasted or uploaded PEM chain and extracts the highest CA certificate from it."
+      description="Connect to a hostname and extract the Certificate Authority certificate(s) from the TLS chain."
     >
       <div className="grid gap-4 md:grid-cols-2">
         <label className="space-y-2 text-sm">
-          <span className="text-slate-300 light:text-slate-700">Hostname</span>
+          <span className="text-slate-300">Hostname</span>
           <input
             value={hostname}
             onChange={(event) => setHostname(event.target.value)}
@@ -45,7 +52,7 @@ function ExtractCAFromHost() {
           />
         </label>
         <label className="space-y-2 text-sm">
-          <span className="text-slate-300 light:text-slate-700">Port</span>
+          <span className="text-slate-300">Port</span>
           <input
             value={port}
             onChange={(event) => setPort(event.target.value)}
@@ -55,81 +62,63 @@ function ExtractCAFromHost() {
         </label>
       </div>
 
-      <FileUpload
-        accept=".pem,.crt,.cer"
-        description="Upload a PEM chain file or paste the full chain below."
-        onFileSelect={handleFileSelect}
-      />
-
-      <label className="block space-y-2 text-sm">
-        <span className="text-slate-300 light:text-slate-700">PEM certificate chain</span>
-        <textarea
-          value={pemChain}
-          onChange={(event) => setPemChain(event.target.value)}
-          className="tool-input mono-output min-h-56"
-          placeholder="-----BEGIN CERTIFICATE-----"
-        />
-      </label>
-
-      <div className="flex flex-wrap items-center gap-3">
-        <button type="button" onClick={handleExtract} className="tool-button">
-          Extract CA
-        </button>
-        <p className="text-xs text-slate-500">
-          Host input is for context only in this browser-only workflow.
-          {hostname || port ? ` Requested target: ${hostname || 'host'}:${port || '443'}` : ''}
-        </p>
-      </div>
+      <button
+        type="button"
+        onClick={handleExtract}
+        className="tool-button"
+        disabled={loading || !hostname.trim()}
+      >
+        {loading ? 'Fetching…' : 'Extract CA'}
+      </button>
 
       {error ? <p className="text-sm text-rose-400">{error}</p> : null}
 
-      {result ? (
+      {certs.length > 0 ? (
         <div className="space-y-5">
-          <dl className="grid gap-4 rounded-2xl border border-slate-800/80 bg-slate-900/60 p-5 text-sm light:border-slate-200 light:bg-white sm:grid-cols-2">
-            <div>
-              <dt className="text-slate-400 light:text-slate-500">Subject</dt>
-              <dd className="mt-1 break-words text-slate-100 light:text-slate-900">{result.subject}</dd>
+          {certs.map((cert, index) => (
+            <div key={index} className="space-y-4">
+              {cert.details ? (
+                <dl className="grid gap-4 rounded-2xl border border-slate-800/80 bg-slate-900/60 p-5 text-sm sm:grid-cols-2">
+                  <div>
+                    <dt className="text-slate-400">Subject</dt>
+                    <dd className="mt-1 break-words text-slate-100">{cert.details.subject}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-slate-400">Issuer</dt>
+                    <dd className="mt-1 break-words text-slate-100">{cert.details.issuer}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-slate-400">Validity</dt>
+                    <dd className="mt-1 text-slate-100">
+                      {cert.details.validity?.notBefore} → {cert.details.validity?.notAfter}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-slate-400">Fingerprint (SHA-256)</dt>
+                    <dd className="mono-output mt-1 break-all text-slate-100">
+                      {cert.details.fingerprint}
+                    </dd>
+                  </div>
+                </dl>
+              ) : null}
+              <CodeBlock
+                title={`CA Certificate ${index + 1}`}
+                value={cert.pem}
+                actions={
+                  <button
+                    type="button"
+                    className="tool-button-secondary"
+                    onClick={() => {
+                      downloadTextFile(`ca-certificate-${index + 1}.pem`, cert.pem)
+                      toast.show('CA certificate downloaded.')
+                    }}
+                  >
+                    Download
+                  </button>
+                }
+              />
             </div>
-            <div>
-              <dt className="text-slate-400 light:text-slate-500">Issuer</dt>
-              <dd className="mt-1 break-words text-slate-100 light:text-slate-900">{result.issuer}</dd>
-            </div>
-            <div>
-              <dt className="text-slate-400 light:text-slate-500">Validity</dt>
-              <dd className="mt-1 text-slate-100 light:text-slate-900">
-                {result.validity.notBefore} → {result.validity.notAfter}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-slate-400 light:text-slate-500">Fingerprint (SHA-256)</dt>
-              <dd className="mono-output mt-1 break-all text-slate-100 light:text-slate-900">
-                {result.fingerprint}
-              </dd>
-            </div>
-            <div className="sm:col-span-2">
-              <dt className="text-slate-400 light:text-slate-500">SANs</dt>
-              <dd className="mt-1 text-slate-100 light:text-slate-900">
-                {result.sans.length ? result.sans.join(', ') : 'None'}
-              </dd>
-            </div>
-          </dl>
-
-          <CodeBlock
-            title="Extracted CA certificate"
-            value={result.pem}
-            actions={
-              <button
-                type="button"
-                className="tool-button-secondary"
-                onClick={() => {
-                  downloadTextFile('certificate-authority.pem', result.pem)
-                  toast.show('CA certificate downloaded.')
-                }}
-              >
-                Download
-              </button>
-            }
-          />
+          ))}
         </div>
       ) : null}
     </ToolCard>

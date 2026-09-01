@@ -1,65 +1,59 @@
-:root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color-scheme: dark light;
-  color: #e5e7eb;
-  background-color: #111827;
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+@variant light (&:where(.light, .light *));
+
+@layer base {
+  :root {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    min-width: 320px;
+    min-height: 100vh;
+  }
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+@layer components {
+  .glass-panel {
+    @apply border border-slate-800/70 bg-slate-950/60 shadow-xl backdrop-blur-sm;
+  }
 
-body {
-  min-width: 320px;
-  min-height: 100vh;
-}
+  :root.light .glass-panel {
+    @apply border-slate-200 bg-white/80;
+  }
 
-code, pre, textarea.mono {
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 0.85rem;
-}
+  .tool-button {
+    @apply inline-flex cursor-pointer items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50;
+  }
 
-.btn-primary {
-  background-color: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: 8px;
-  padding: 0.55rem 1.2rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  transition: background-color 0.15s;
-}
+  .tool-button-secondary {
+    @apply inline-flex cursor-pointer items-center justify-center rounded-xl border border-slate-700 bg-transparent px-4 py-2 text-sm text-slate-300 transition hover:border-slate-500 hover:text-slate-100 disabled:cursor-not-allowed disabled:opacity-50;
+  }
 
-.btn-primary:hover:not(:disabled) {
-  background-color: var(--accent-hover);
-}
+  :root.light .tool-button-secondary {
+    @apply border-slate-300 text-slate-700 hover:border-slate-400 hover:text-slate-900;
+  }
 
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
+  .tool-input {
+    @apply w-full rounded-xl border border-slate-700 bg-slate-900/60 px-3 py-2 text-sm text-slate-100 outline-none transition focus:border-blue-500 focus:ring-1 focus:ring-blue-500;
+  }
 
-.btn-secondary {
-  background: transparent;
-  color: var(--text-muted);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 0.4rem 0.9rem;
-  font-size: 0.85rem;
-  cursor: pointer;
-  transition: all 0.15s;
-}
+  :root.light .tool-input {
+    @apply border-slate-300 bg-white text-slate-900;
+  }
 
-.btn-secondary:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  .mono-output {
+    font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', Courier, monospace;
+    font-size: 0.75rem;
+  }
 }
 

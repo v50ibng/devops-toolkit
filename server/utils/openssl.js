@@ -9,7 +9,7 @@ const TIMEOUT_MS = 10000;
  */
 export function validateHost(host) {
   if (typeof host !== 'string') return false;
-  if (!/^[a-zA-Z0-9.\-]+$/.test(host) || host.length > 253) return false;
+  if (!/^[a-zA-Z0-9.-]+$/.test(host) || host.length > 253) return false;
 
   // Block loopback and common private/internal ranges
   const blocked = [

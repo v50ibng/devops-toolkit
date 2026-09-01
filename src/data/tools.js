@@ -2,7 +2,7 @@ export const sslTools = [
   {
     id: 'extract-ca',
     name: 'Extract CA from Host',
-    description: 'Paste or upload a PEM chain and extract the highest CA certificate available.',
+    description: 'Connect to a hostname and extract the Certificate Authority certificate in PEM format.',
   },
   {
     id: 'certificate-details',
@@ -44,9 +44,19 @@ export const jwtTools = [
   },
 ]
 
+export const passwordTools = [
+  {
+    id: 'generate',
+    name: 'Password Generator',
+    description:
+      'Generate a cryptographically secure random password with configurable length and character sets.',
+  },
+]
+
 export const comingSoonTools = [
   'Base64 Encode/Decode',
   'Hash Generator',
   'URL Encode/Decode',
   'Cron Parser',
 ]
+

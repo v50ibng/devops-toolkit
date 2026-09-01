@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import ToolCard from '../common/ToolCard.jsx'
 import FileUpload from '../common/FileUpload.jsx'
+import ToolCard from '../common/ToolCard.jsx'
 import { compareCertificateAndKey } from '../../utils/certificates.js'
 import { readFileAsText } from '../../utils/files.js'
 
@@ -24,9 +24,7 @@ function VerifyCertKeyMatch() {
       setResult(compareCertificateAndKey(certificatePem, keyPem))
     } catch (verifyError) {
       setResult(null)
-      setError(
-        verifyError.message || 'Unable to compare the certificate and private key.',
-      )
+      setError(verifyError.message || 'Unable to compare the certificate and private key.')
     }
   }
 
@@ -43,7 +41,7 @@ function VerifyCertKeyMatch() {
             onFileSelect={handleCertificateFile}
           />
           <label className="block space-y-2 text-sm">
-            <span className="text-slate-300 light:text-slate-700">Certificate PEM</span>
+            <span className="text-slate-300">Certificate PEM</span>
             <textarea
               value={certificatePem}
               onChange={(event) => setCertificatePem(event.target.value)}
@@ -59,7 +57,7 @@ function VerifyCertKeyMatch() {
             onFileSelect={handleKeyFile}
           />
           <label className="block space-y-2 text-sm">
-            <span className="text-slate-300 light:text-slate-700">Private key PEM</span>
+            <span className="text-slate-300">Private key PEM</span>
             <textarea
               value={keyPem}
               onChange={(event) => setKeyPem(event.target.value)}
@@ -80,12 +78,14 @@ function VerifyCertKeyMatch() {
         <div
           className={`rounded-2xl border px-5 py-4 text-sm shadow-sm ${
             result.matches
-              ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200 light:bg-emerald-50 light:text-emerald-800'
-              : 'border-rose-500/40 bg-rose-500/10 text-rose-200 light:bg-rose-50 light:text-rose-800'
+              ? 'border-emerald-500/40 bg-emerald-500/10 text-emerald-200'
+              : 'border-rose-500/40 bg-rose-500/10 text-rose-200'
           }`}
         >
           <p className="text-lg font-semibold">
-            {result.matches ? '✅ Certificate and private key match' : '❌ Certificate and private key do not match'}
+            {result.matches
+              ? '✅ Certificate and private key match'
+              : '❌ Certificate and private key do not match'}
           </p>
           <div className="mt-4 grid gap-4 lg:grid-cols-2">
             <div>

@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import ToolCard from '../common/ToolCard.jsx'
 import CodeBlock from '../common/CodeBlock.jsx'
 import FileUpload from '../common/FileUpload.jsx'
+import ToolCard from '../common/ToolCard.jsx'
 import { useToast } from '../common/useToast.jsx'
 import { convertDerToPem, convertPemToDerBase64 } from '../../utils/certificates.js'
 import {
@@ -25,7 +25,6 @@ function PemDerConverter() {
       setInput(btoa(binary))
       return
     }
-
     setMode('pem')
     setInput(await readFileAsText(file))
   }
@@ -33,19 +32,11 @@ function PemDerConverter() {
   function handleConvert() {
     try {
       setError('')
-
       if (mode === 'pem') {
-        setResult({
-          mode,
-          ...convertPemToDerBase64(input),
-        })
+        setResult({ mode, ...convertPemToDerBase64(input) })
         return
       }
-
-      setResult({
-        mode,
-        text: convertDerToPem(input.replace(/\s+/g, '')),
-      })
+      setResult({ mode, text: convertDerToPem(input.replace(/\s+/g, '')) })
     } catch (convertError) {
       setResult(null)
       setError(convertError.message || 'Unable to convert the provided certificate.')
@@ -81,7 +72,7 @@ function PemDerConverter() {
       />
 
       <label className="block space-y-2 text-sm">
-        <span className="text-slate-300 light:text-slate-700">
+        <span className="text-slate-300">
           {mode === 'pem' ? 'PEM certificate' : 'DER certificate (base64 text or .der upload)'}
         </span>
         <textarea
@@ -89,9 +80,7 @@ function PemDerConverter() {
           onChange={(event) => setInput(event.target.value)}
           className="tool-input mono-output min-h-56"
           placeholder={
-            mode === 'pem'
-              ? '-----BEGIN CERTIFICATE-----'
-              : 'MIID... (base64-encoded DER)'
+            mode === 'pem' ? '-----BEGIN CERTIFICATE-----' : 'MIID… (base64-encoded DER)'
           }
         />
       </label>

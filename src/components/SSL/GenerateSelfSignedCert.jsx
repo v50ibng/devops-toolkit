@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import ToolCard from '../common/ToolCard.jsx'
 import CodeBlock from '../common/CodeBlock.jsx'
+import ToolCard from '../common/ToolCard.jsx'
 import { useToast } from '../common/useToast.jsx'
 import { generateSelfSignedCertificate } from '../../utils/certificates.js'
 import { downloadTextFile } from '../../utils/files.js'
@@ -49,7 +49,7 @@ function GenerateSelfSignedCert() {
     >
       <div className="grid gap-4 md:grid-cols-2">
         <label className="space-y-2 text-sm">
-          <span className="text-slate-300 light:text-slate-700">Common Name</span>
+          <span className="text-slate-300">Common Name</span>
           <input
             value={form.commonName}
             onChange={(event) => updateField('commonName', event.target.value)}
@@ -57,7 +57,7 @@ function GenerateSelfSignedCert() {
           />
         </label>
         <label className="space-y-2 text-sm">
-          <span className="text-slate-300 light:text-slate-700">SANs</span>
+          <span className="text-slate-300">SANs (comma-separated)</span>
           <input
             value={form.sans}
             onChange={(event) => updateField('sans', event.target.value)}
@@ -66,7 +66,7 @@ function GenerateSelfSignedCert() {
           />
         </label>
         <label className="space-y-2 text-sm">
-          <span className="text-slate-300 light:text-slate-700">Validity (days)</span>
+          <span className="text-slate-300">Validity (days)</span>
           <input
             type="number"
             min="1"
@@ -76,14 +76,14 @@ function GenerateSelfSignedCert() {
           />
         </label>
         <label className="space-y-2 text-sm">
-          <span className="text-slate-300 light:text-slate-700">Key size</span>
+          <span className="text-slate-300">Key size</span>
           <select
             value={form.keySize}
             onChange={(event) => updateField('keySize', event.target.value)}
             className="tool-input"
           >
-            <option value="2048">2048</option>
-            <option value="4096">4096</option>
+            <option value="2048">2048 bits</option>
+            <option value="4096">4096 bits</option>
           </select>
         </label>
       </div>
@@ -101,22 +101,20 @@ function GenerateSelfSignedCert() {
 
       {result ? (
         <div className="space-y-5">
-          <dl className="grid gap-4 rounded-2xl border border-slate-800/80 bg-slate-900/60 p-5 text-sm light:border-slate-200 light:bg-white sm:grid-cols-2">
+          <dl className="grid gap-4 rounded-2xl border border-slate-800/80 bg-slate-900/60 p-5 text-sm sm:grid-cols-2">
             <div>
-              <dt className="text-slate-400 light:text-slate-500">Subject</dt>
-              <dd className="mt-1 text-slate-100 light:text-slate-900">{result.details.subject}</dd>
+              <dt className="text-slate-400">Subject</dt>
+              <dd className="mt-1 text-slate-100">{result.details.subject}</dd>
             </div>
             <div>
-              <dt className="text-slate-400 light:text-slate-500">Fingerprint</dt>
-              <dd className="mono-output mt-1 break-all text-slate-100 light:text-slate-900">
+              <dt className="text-slate-400">Fingerprint</dt>
+              <dd className="mono-output mt-1 break-all text-slate-100">
                 {result.details.fingerprint}
               </dd>
             </div>
             <div className="sm:col-span-2">
-              <dt className="text-slate-400 light:text-slate-500">SANs</dt>
-              <dd className="mt-1 text-slate-100 light:text-slate-900">
-                {result.details.sans.join(', ')}
-              </dd>
+              <dt className="text-slate-400">SANs</dt>
+              <dd className="mt-1 text-slate-100">{result.details.sans.join(', ')}</dd>
             </div>
           </dl>
 
